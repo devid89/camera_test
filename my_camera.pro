@@ -13,7 +13,9 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h
+    filters.hpp \
+    mainwindow.h \
+    mat.hpp
 
 FORMS += \
     mainwindow.ui
