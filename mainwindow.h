@@ -11,6 +11,9 @@
 #include <QLabel>
 #include <QTimer>
 
+#include "mat.hpp"
+#include "filters.hpp"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -34,6 +37,8 @@ private:
     QCamera m_camera;
     QCameraImageCapture m_imageCapture ;
 
+    Filters* filters;
+
     QImage _image;
 
     bool    work;
@@ -45,7 +50,7 @@ signals:
     void signal_start();
 
 private slots:
-    void slot_capture(int id, const QImage& image);
+    void slot_capture(int, const QImage& image);
 
     void    slot_start();
 

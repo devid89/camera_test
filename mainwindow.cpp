@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_camera(QCameraInfo::defaultCamera())
     , m_imageCapture(&m_camera)
+    , filters(nullptr)
     , work(true)
 {
     ui->setupUi(this);
@@ -43,18 +44,10 @@ void MainWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
+    /// Разтянть на весь экран
+    QImage img = _image.scaled(this->width(), this->height());
     /// Отрисовка кадра
-    painter.drawImage(0, 0, _image);
-
-    /// Рисовать на кадре
-    QPen pen = painter.pen();
-    pen.setColor(QColor(255, 0, 0));
-    pen.setWidth(10);
-    painter.setPen(pen);
-
-    /// рисуем круг
-    painter.drawEllipse(this->width()/2 - 50, this->height()/2 - 50, 100, 100);
-
+    painter.drawImage(0, 0, img);
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -62,11 +55,26 @@ void MainWindow::closeEvent(QCloseEvent *)
     exit(0);
 }
 
-void MainWindow::slot_capture(int id, const QImage &image)
+void MainWindow::slot_capture(int, const QImage &image)
 {
+    /// Создать объект Filters
+    /// Создаем тут, так как нужен размер изображения, а получаем мы его только в этой функции
+    if(!filters)
+        filters = new Filters(image.width(), image.height());
+
+    /// Сохранить полученное изображение
     _image = image;
 
+    /// Обновить координаты квадрата
+    filters->update(100, 100, 200, 150);
+
+    /// Нарисовать квадрат
+    filters->filtration(_image.bits());
+
+    /// Расчет FPS
     frams++;
+
+    /// Отрисовка на форме
     repaint();
 }
 
