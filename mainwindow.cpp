@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(&m_imageCapture, &QCameraImageCapture::imageCaptured, this, &MainWindow::slot_capture);
 
-    m_camera.setCaptureMode(QCamera::CaptureVideo);
+    m_camera.setCaptureMode(QCamera::CaptureStillImage);
 
     m_camera.start();
     m_imageCapture.setCaptureDestination(QCameraImageCapture::CaptureToBuffer);
