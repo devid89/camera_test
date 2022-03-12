@@ -23,22 +23,26 @@ class Filters
         }
 
         /// Получить значения
-        uint8_t alfa()  {return *_alfa;}
-        uint8_t red()   {return *_red;}
-        uint8_t green() {return *_green;}
-        uint8_t blue()  {return *_blue;}
+        uint8_t a() {return *_alfa;}
+        uint8_t r() {return *_red;}
+        uint8_t g() {return *_green;}
+        uint8_t b() {return *_blue;}
 
         /// Установить значения
-        void alfa (uint8_t val) {*_alfa  = val;}
-        void red  (uint8_t val) {*_red   = val;}
-        void green(uint8_t val) {*_green = val;}
-        void blue (uint8_t val) {*_blue  = val;}
+        void a(uint8_t val) {*_alfa  = val;}
+        void r(uint8_t val) {*_red   = val;}
+        void g(uint8_t val) {*_green = val;}
+        void b(uint8_t val) {*_blue  = val;}
+
+        /// Установить значения
+        void rgb(uint8_t r, uint8_t g, uint8_t b) {*_red = r, *_green = g, *_blue = b, *_alfa = 255;}
     };
 
     class MyImage {
     private:
         uint8_t* image_pixels;  ///< Указатель на 1 пиксель изображения
-        uint16_t widht;         ///< Ширина изображения в пикселях
+        uint16_t _width;        ///< Ширина изображения в пикселях
+        uint16_t _height;       ///< Ширина изображения в пикселях
 
     public:
         /**
@@ -46,10 +50,15 @@ class Filters
          * @param image_pixels  Указатель на 1 пиксель
          * @param widht         Ширина изображения в пикселях
          */
-        MyImage(uint8_t* image_pixels, uint16_t widht)
+        MyImage(uint8_t* image_pixels, uint16_t width, uint16_t height)
             : image_pixels(image_pixels)
-            , widht(widht)
+            , _width(width)
+            , _height(height)
         {}
+
+        /// Вернем размеры изображения.
+        int width()  {return _width;}
+        int height() {return _height;}
 
         /**
          * @brief Получить пиксель
@@ -57,10 +66,20 @@ class Filters
          * @param col   Номер столбца
          * @return
          */
-        MyPixel pixel(uint16_t row, uint16_t col)
+        MyPixel pixel(uint16_t col, uint16_t row)
         {
-            uint64_t index = (row * widht + col) * 4;
+            uint64_t index = (row * _width + col) * 4;
             return MyPixel(image_pixels + index);
+        }
+        MyPixel px(uint16_t col, uint16_t row, uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+        {
+            uint64_t index = (row * _width + col) * 4;
+            MyPixel  pixel = (image_pixels + index);
+            pixel.r(r);
+            pixel.g(g);
+            pixel.b(b);
+            pixel.a(a);
+            return pixel;
         }
 
     };
@@ -69,7 +88,7 @@ class Filters
 //   uint8_t r[SrcI][SrcJ];
 //   uint8_t g[SrcI][SrcJ];
 //   uint8_t b[SrcI][SrcJ];
-    uint16_t widht;
+    uint16_t width;
     uint16_t height;
 
    // Последнее обновленное преобразование.
@@ -98,13 +117,20 @@ class Filters
    /// Тестовый фильтр рисования красного квадрата.
    void test(MyImage& img)
    {
-      for (int c = x1;  c <= x2;  ++c) {
-      for (int r = y1;  r <= y2;  ++r) {
-          MyPixel pixel = img.pixel(r, c);
-          pixel.red(255);
-          pixel.green(0);
-          pixel.blue(0);
-          pixel.alfa(255);
+       printf("width=%d\n", img.width());
+
+      for (int i = x1;  i < img.width()  / 2;  ++i) {
+      for (int j = y1;  j < img.height() / 2;  ++j) {
+//          MyPixel pixel = img.pixel(i, j);
+//          pixel.r(0);
+//          pixel.g(255);
+//          pixel.b(0);
+//          pixel.a(12);
+
+//          img.px(i, j, 0, 127, 255, 64);
+
+          MyPixel px = img.pixel(i, j);
+          px.rgb(px.r() + 50, px.g() + 50, px.b() + 50);
       }}
    }
 
@@ -120,7 +146,7 @@ public:
     * @param height         Высота изображения
     */
    Filters(uint16_t widht, uint16_t height)
-       : widht(widht)
+       : width(widht)
        , height(height)
    {
 //      r = red;
@@ -156,7 +182,7 @@ public:
     */
    void filtration(uint8_t* image_pixels)
    {
-       MyImage img (image_pixels, widht);
+       MyImage img(image_pixels, width, height);
       test   (img);
 //    filter_lips   ();
 //    filter_shadow ();

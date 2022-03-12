@@ -1,0 +1,73 @@
+﻿# КОММЕНТАРИИ НАЧИНАТЬ ТОЛЬКО С НОВОЙ СТРОКИ!!!
+# Если вы не хотите добавлять в репозиторий определенную папку,
+# создайте в ней собственный файл .gitignore
+# Игрорируем всё, дальше разрешаем необходимое
+*
+!*/
+
+# игнорировать следующие каталоги
+_exe*/
+_bin/
+_build/
+_obj*/
+*release/
+*debug/
+*build/
+x86/
+
+# разрешить следующие файлы и каталоги
+!.gitignore
+!*.h
+!*.hh
+!*.hpp
+!*.cpp
+!*.c
+!*.cc
+!*.l
+!*.y
+!*.pro
+!*.pri
+!*.mk
+!*.ui
+!*.ico
+!*.rc
+!*.qrc
+!*.qm
+!*.ts
+!*.use
+!*.bat
+!*.sh
+!*.txt
+!*.doc
+!*.vsd
+!*.ini
+!*.tab
+!*.xml
+!*.kml
+!*.json
+!*.prv
+!*.html
+!*.htm
+!*.py
+!*.local
+!*.pdf
+!*.js
+!*.jpg
+!*.jpeg
+!*.png
+!*.mtl
+!*.obj
+!*.wav
+!*.css
+!rce_hosts
+!ChangeLog
+!README
+!.project
+!.cproject
+!.qnx_internal.mk
+!*.prefs
+
+# исключить ненужные файлы из разрешенных
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
