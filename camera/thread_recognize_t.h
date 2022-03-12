@@ -26,7 +26,18 @@ public slots:
     {
         if(image.width() == 0) return;
         /// Изменить размер фото на 200х200, наверно потом это нужно как изменить
-        QImage _image = image.scaled(200,200);
+        int x = 0;
+        int y = 0;
+        int w = image.width();
+        int h = image.height();
+        if(w>h) {
+            x = (w-h) / 2;
+            w = h;
+        } else if(h> w) {
+            y = (h-w) / 2;
+            h = w;
+        }
+        QImage _image = image.copy(x,y,w,h).scaled(Width, Height);
 
         /// Массивы изображения.
         static int  r[Width][Height];
