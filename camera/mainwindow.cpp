@@ -11,13 +11,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    _thread.start();
+    thread_recognize.moveToThread(&_thread);
+
     frams = 0;
-    connect(&timer, &QTimer::timeout, this, &MainWindow::slot_timeout);
+    connect(&timer, &QTimer::timeout, this, &MainWindow::slot_timeout, Qt::QueuedConnection);
     timer.start(1000);
 
-    connect(this, &MainWindow::signal_start, this, &MainWindow::slot_start);
+    connect(this, &MainWindow::signal_start, this, &MainWindow::slot_start, Qt::QueuedConnection);
 
-    connect(&m_imageCapture, &QCameraImageCapture::imageCaptured, this, &MainWindow::slot_capture);
+    connect(&m_imageCapture, &QCameraImageCapture::imageCaptured, this, &MainWindow::slot_capture, Qt::QueuedConnection);
+    connect(&m_imageCapture, &QCameraImageCapture::imageCaptured, &thread_recognize, &thread_recognize_t::slot_capture, Qt::QueuedConnection);
 
     m_camera.setCaptureMode(QCamera::CaptureMode::CaptureStillImage);  // CaptureStillImage
 
@@ -26,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     label = new QLabel();
     ui->statusBar->addWidget(label);
+
+    init();
 
 }
 
@@ -39,8 +45,11 @@ void MainWindow::start()
     emit signal_start();
 }
 
-void MainWindow::paintEvent(QPaintEvent *)
+void MainWindow::paintEvent(QPaintEvent *event)
 {
+    QMainWindow::paintEvent(event);
+
+    if(_image.width() == 0) return;
     QPainter painter(this);
 
     /// Разтянть на весь экран
@@ -49,20 +58,23 @@ void MainWindow::paintEvent(QPaintEvent *)
     painter.drawImage(0, 0, img);
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-    exit(0);
+    work = false;
+    _thread.exit();
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::slot_capture(int, const QImage &image)
 {
+    if(image.width() == 0) return;
     /// Изменить размер фото на 200х200, наверно потом это нужно как изменить
     _image = image.scaled(200,200);
 
     /// Массивы изображения.
-    int  r[Width][Height];
-    int  g[Width][Height];
-    int  b[Width][Height];
+    static int  r[Width][Height];
+    static int  g[Width][Height];
+    static int  b[Width][Height];
 
     for (int i = 0; i < Width;  i++) {
             for (int j = 0; j < Height; j++) {
@@ -73,13 +85,15 @@ void MainWindow::slot_capture(int, const QImage &image)
             }}
 
 
-    // Распознаем изображение.
-    Trans trans(Width / 2, 0,
-                Width / 2, Height,
-                0, 0,
-                0, AccY-1);
-    int res_w = recognize(&trans, r, g, b);
+//    // Распознаем изображение.
+//    Trans trans(Width / 2, 0,
+//                Width / 2, Height,
+//                0, 0,
+//                0, AccY-1);
+//    int res_w = recognize(&trans, r, g, b);
 //    std::cout << "Image #" << f << " dt=" << (clock() - time) / 1e6 << " w=" << res_w << std::endl;
+
+    Trans trans = thread_recognize.get_trans();
 
     // Фильтранем изображение в распознанной области.
     filter.filtrate(r, g, b, trans, (double)ui->horizontalSlider->value() / 100.0, (double)ui->horizontalSlider_2->value() / 100.0);
@@ -89,7 +103,7 @@ void MainWindow::slot_capture(int, const QImage &image)
         for (int j = 0; j < Height; j++) {
             _image.setPixel(i, j, qRgb(r[i][j], g[i][j], b[i][j]));
         }}
-
+qDebug() << "new image";
     frams++;    /// Расчет FPS
     repaint();    /// Отрисовка на форме
 }

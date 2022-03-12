@@ -18,7 +18,8 @@ HEADERS += \
     ../shared/filtration.hpp \
     ../shared/mat.hpp \
     ../shared/recognition.hpp \
-    mainwindow.h
+    mainwindow.h \
+    thread_recognize_t.h
 
 FORMS += \
     mainwindow.ui

@@ -10,10 +10,14 @@
 #include <QDateTime>
 #include <QLabel>
 #include <QTimer>
+#include <QCloseEvent>
+#include <QThread>
 
 #include "../shared/mat.hpp"
 #include "../shared/filtration.hpp"
 #include "../shared/recognition.hpp"
+
+#include "thread_recognize_t.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,8 +33,8 @@ public:
 
     void    start();
 
-    void paintEvent(QPaintEvent *);
-    void closeEvent(QCloseEvent *);
+    void paintEvent(QPaintEvent *event);
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;
@@ -39,6 +43,8 @@ private:
     QCameraImageCapture m_imageCapture ;
 
     Filter filter;
+    thread_recognize_t thread_recognize;
+    QThread _thread;
 
     QImage _image;
 
